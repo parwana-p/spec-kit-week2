@@ -2,11 +2,11 @@
 
 **Branch**: `001-quote-of-the-day` | **Date**: 2026-10-17 | **Spec**: [spec.md](spec.md)
 
-**Input**: Feature specification from `specs/001-quote-of-the-day/spec.md`
+**Input**: Feature specification from `specs/001-quote-of-the-day/spec.md` (Updated for Deterministic Daily Quote Selection)
 
 ## Summary
 
-Build a lightweight, zero-dependency Quote of the Day web page delivering random inspirational quotes from a curated built-in collection, featuring on-demand quote switching with consecutive-duplicate prevention, and persistent favoriting via browser `localStorage` with in-memory degradation fallback. The implementation strictly adheres to standard HTML5, modern CSS3, and ES6 modular JavaScript with clean architectural separation between pure domain services and DOM controllers.
+Build a lightweight, zero-dependency Quote of the Day web page delivering a consistent Quote of the Day deterministically derived from the user's local calendar date (`YYYY-MM-DD`), ensuring that refreshing or reopening the application throughout the same calendar day consistently presents the exact same quote. The page features on-demand quote exploration via a "New quote" button that chooses random quotes while guaranteeing no consecutive duplicates, and persistent favoriting via browser `localStorage` with an in-memory degradation fallback. The implementation strictly adheres to standard HTML5, modern CSS3, and ES6 modular JavaScript with clean architectural separation between pure domain services and DOM controllers.
 
 ## Technical Context
 
@@ -24,7 +24,7 @@ Build a lightweight, zero-dependency Quote of the Day web page delivering random
 
 **Performance Goals**: Initial page render < 1.0 second; quote cycle update latency < 100 milliseconds; zero layout reflows
 
-**Constraints**: Completely offline-ready; no external network API calls required; WCAG 2.1 AA accessible (contrast ratio $\ge 4.5:1$, keyboard operable, ARIA live region support)
+**Constraints**: Completely offline-ready; no external network API calls required; WCAG 2.1 AA accessible (contrast ratio $\ge 4.5:1$, keyboard operable, ARIA live region support); deterministic date hashing for daily quote stability across same-day visits
 
 **Scale/Scope**: Single-user local client; initial built-in curated collection of 25+ diverse quotes
 
@@ -35,9 +35,9 @@ Build a lightweight, zero-dependency Quote of the Day web page delivering random
 | Constitutional Principle | Status | Evaluation & Alignment Details |
 |---|---|---|
 | **I. High Code Quality & Clean Architecture** | **PASS** | Modular architecture separating data (`quotes.js`), pure domain logic (`quote-service.js`, `storage.js`), UI controllers (`quote-view.js`, `favorites-view.js`), and app coordinator (`app.js`). High cohesion, loose coupling, zero lint warnings. |
-| **II. Test-Driven Verification & Comprehensive Coverage** | **PASS** | Services are pure and decoupled from the DOM, allowing comprehensive automated unit tests covering random selection, no-repeat logic, edge cases, and storage fallback behavior with $\ge 90\%$ test coverage. |
-| **III. Maintainability, Simplicity, & Low Cognitive Load** | **PASS** | Plain HTML/CSS/JS without heavyweight framework abstractions or build tool complexities. Strict adherence to KISS and YAGNI. Functions designed with low cyclomatic complexity ($\le 10$). |
-| **IV. Continuous Refactoring & Technical Debt Containment** | **PASS** | Clean interfaces with well-defined contracts in `contracts/`. Domain logic separated from presentation. |
+| **II. Test-Driven Verification & Comprehensive Coverage** | **PASS** | Services are pure and decoupled from the DOM. `getDailyQuote()` accepts an injectable date parameter allowing comprehensive unit tests verifying same-day determinism, multi-year stability, and leap year handling with $\ge 90\%$ test coverage. |
+| **III. Maintainability, Simplicity, & Low Cognitive Load** | **PASS** | Plain HTML/CSS/JS without heavyweight framework abstractions or build tool complexities. Fast 32-bit integer string hash on local date (`YYYY-MM-DD`). Functions maintain low cyclomatic complexity ($\le 10$). |
+| **IV. Continuous Refactoring & Technical Debt Containment** | **PASS** | Clean interfaces with well-defined contracts in `contracts/quote-service.contract.md`. Domain logic remains completely isolated from presentation. |
 | **V. Predictable Error Handling & Observable Systems** | **PASS** | Robust `try / catch` wrapping of `localStorage` operations, graceful degradation to in-memory store if storage is restricted or corrupted, clear accessible status feedback. |
 
 ## Project Structure
@@ -46,7 +46,7 @@ Build a lightweight, zero-dependency Quote of the Day web page delivering random
 
 ```text
 specs/001-quote-of-the-day/
-├── spec.md              # Feature specification
+├── spec.md              # Feature specification (refined with calendar day determinism)
 ├── plan.md              # Master implementation plan
 ├── research.md          # Technical decisions and architectural research
 ├── data-model.md        # Entities, storage schema, and state transitions
@@ -71,9 +71,9 @@ src/
 └── js/
     ├── app.js                   # Application bootstrap and event coordinator
     ├── data/
-    │   └── quotes.js            # Curated library of 25+ diverse quotes
+    │   └── quotes.js            # Curated library of 26 diverse quotes
     ├── services/
-    │   ├── quote-service.js     # Pure business logic: random selection & no-repeat
+    │   ├── quote-service.js     # Pure business logic: daily quote & random selection
     │   └── storage.js           # Persistence manager: localStorage + in-memory fallback
     └── ui/
         ├── quote-view.js        # Quote card DOM rendering and ARIA management
@@ -81,9 +81,12 @@ src/
 
 tests/
 ├── unit/
-│   ├── quote-service.test.js    # Unit tests for selection & no-repeat logic
-│   └── storage.test.js          # Unit tests for storage serialization & fallbacks
+│   ├── quote-service.test.js    # Unit tests for daily quote & no-repeat random logic
+│   ├── storage.test.js          # Unit tests for storage serialization & fallbacks
+│   └── favorites-view.test.js   # Unit tests for favorites drawer UI
 └── integration/
+    ├── quote-view.test.js       # Integration tests for initial quote rendering
+    ├── favorite-toggle.test.js  # Integration tests for favorite toggling & persistence
     └── app-workflow.test.js     # Integrated workflow tests across services
 ```
 

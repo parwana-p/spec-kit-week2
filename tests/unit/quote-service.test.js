@@ -58,4 +58,43 @@ describe("QuoteService", () => {
       assert.ok(["quote-2", "quote-3"].includes(quote.id));
     }
   });
+
+  // Daily Quote Tests (US1)
+  test("should return the identical daily quote for the same local calendar date across different times", () => {
+    const service = new QuoteService(sampleQuotes);
+
+    // Morning, noon, night on 2026-10-17
+    const morning = new Date(2026, 9, 17, 8, 30, 0);
+    const noon = new Date(2026, 9, 17, 12, 0, 0);
+    const night = new Date(2026, 9, 17, 23, 59, 59);
+
+    const quoteMorning = service.getDailyQuote(morning);
+    const quoteNoon = service.getDailyQuote(noon);
+    const quoteNight = service.getDailyQuote(night);
+
+    assert.ok(quoteMorning);
+    assert.equal(quoteMorning.id, quoteNoon.id, "Morning and noon quotes must match");
+    assert.equal(quoteNoon.id, quoteNight.id, "Noon and night quotes must match");
+  });
+
+  test("should return a valid daily quote by default when no date is passed", () => {
+    const service = new QuoteService(sampleQuotes);
+    const todayQuote = service.getDailyQuote();
+    assert.ok(todayQuote);
+    assert.ok(["quote-1", "quote-2", "quote-3"].includes(todayQuote.id));
+  });
+
+  test("should deterministically select quotes across different dates", () => {
+    const service = new QuoteService(sampleQuotes);
+    const date1 = new Date(2026, 9, 17);
+    const date2 = new Date(2026, 9, 18);
+
+    const quoteDay1 = service.getDailyQuote(date1);
+    const quoteDay2 = service.getDailyQuote(date2);
+
+    assert.ok(quoteDay1);
+    assert.ok(quoteDay2);
+    // Verifying calling date1 again yields the same quoteDay1
+    assert.equal(service.getDailyQuote(date1).id, quoteDay1.id);
+  });
 });

@@ -2,7 +2,7 @@
 
 **Feature**: `001-quote-of-the-day`
 **Date**: 2026-10-17
-**Status**: Completed
+**Status**: Completed (Updated for Deterministic Daily Quote Selection)
 
 ## 1. Entities
 
@@ -84,31 +84,33 @@ class MemoryStorage {
 ## 3. State Transitions & Invariants
 
 ```
-                +-------------------+
-                |   Page Initial    |
-                |       Load        |
-                +---------+---------+
-                          |
-                          v
-                +-------------------+
-                | Display Random    |
-                |   Quote (Q1)      |
-                +---------+---------+
-                          |
-          +---------------+---------------+
-          |                               |
-    [Click New Quote]             [Toggle Favorite]
-          |                               |
-          v                               v
-+-------------------+           +-------------------+
-| Display New Quote |           | If Q1 in Favorites|
-| Q2 (where Q2!=Q1) |           |   -> Remove Q1    |
-+-------------------+           | Else              |
-                                |   -> Add Q1       |
-                                +-------------------+
+                +-----------------------------------------+
+                |           Page Initial Load             |
+                +--------------------+--------------------+
+                                     |
+                                     v
+                +-----------------------------------------+
+                |    Compute Daily Quote Q_day            |
+                |    (hash(localDateString) % N)          |
+                |    Display Q_day                        |
+                +--------------------+--------------------+
+                                     |
+                     +---------------+---------------+
+                     |                               |
+               [Click New Quote]             [Toggle Favorite]
+                     |                               |
+                     v                               v
+           +--------------------+          +--------------------+
+           | Select Random Q_new|          | If Q in Favorites  |
+           | where Q_new != Q   |          |   -> Remove Q      |
+           | Display Q_new      |          | Else               |
+           +--------------------+          |   -> Add Q         |
+                                           +--------------------+
 ```
 
 ### Invariants:
-1. **No Consecutive Duplicate**: If quote collection size $N \ge 2$, `nextQuote.id !== currentQuote.id`.
-2. **Idempotent Favoriting**: Adding an already-favorited quote ID does not create duplicates. Removing a non-existent favorite ID is a safe no-op.
-3. **Data Integrity on Parse Failure**: If `localStorage.getItem("qod_favorites_v1")` returns malformed JSON, the parser resets the key to `[]` without throwing an unhandled runtime error.
+1. **Daily Quote Calendar Invariance**: For any visit on a local calendar date $D$, `getDailyQuote(D)` is deterministic and idempotent. Repeated reloads on the same calendar day return the identical quote of the day.
+2. **Next-Day Determinism**: When local calendar date advances to $D+1$, `getDailyQuote(D+1)` deterministically yields the quote assigned for $D+1$.
+3. **No Consecutive Duplicate on New Quote**: When the user clicks "New quote", if quote collection size $N \ge 2$, `nextQuote.id !== currentQuote.id`.
+4. **Idempotent Favoriting**: Adding an already-favorited quote ID does not create duplicates. Removing a non-existent favorite ID is a safe no-op.
+5. **Data Integrity on Parse Failure**: If `localStorage.getItem("qod_favorites_v1")` returns malformed JSON, the parser resets the key to `[]` without throwing an unhandled runtime error.

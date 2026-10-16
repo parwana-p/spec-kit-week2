@@ -16,6 +16,22 @@ Initializes the service with a collection of quotes.
 
 ---
 
+### `getDailyQuote(date?: Date): Quote`
+Returns the deterministic Quote of the Day for a given calendar day based on local date (`YYYY-MM-DD`).
+- **Parameters**:
+  - `date` *(optional, Date)*: Date instance to evaluate (defaults to `new Date()`).
+- **Behavior**:
+  - Extracts the local calendar date string (`YYYY-MM-DD`).
+  - Computes a deterministic integer hash from the date string.
+  - Maps hash modulo collection length to an index in `quotes`.
+- **Returns**: `Quote`
+- **Postconditions**:
+  - Returned object is guaranteed to be a valid `Quote`.
+  - Deterministic: calling `getDailyQuote(d)` multiple times with any `Date` instances sharing the same local calendar date returns the identical `Quote` every time.
+  - Across different calendar dates, selects quotes consistently.
+
+---
+
 ### `getRandomQuote(excludeId?: string): Quote`
 Returns a randomly selected quote from the collection.
 - **Parameters**:

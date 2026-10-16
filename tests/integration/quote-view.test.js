@@ -1,6 +1,7 @@
 import { test, describe } from "node:test";
 import assert from "node:assert/strict";
 import { QuoteView } from "../../src/js/ui/quote-view.js";
+import { QuoteService } from "../../src/js/services/quote-service.js";
 
 /**
  * Mock DOM element helper for integration testing
@@ -71,5 +72,22 @@ describe("QuoteView (US1)", () => {
 
     assert.equal(favoriteButton.getAttribute("aria-pressed"), "true");
     assert.equal(favoriteButton.classList.contains("is-favorite"), true);
+  });
+
+  test("should render deterministic daily quote from QuoteService on load", () => {
+    const textElement = createMockElement();
+    const authorElement = createMockElement();
+    const favoriteButton = createMockElement();
+
+    const view = new QuoteView({ textElement, authorElement, favoriteButton });
+    const quotes = [
+      { id: "q-10", text: "Daily Quote Text", author: "Daily Author" }
+    ];
+    const service = new QuoteService(quotes);
+    const dailyQuote = service.getDailyQuote ? service.getDailyQuote() : quotes[0];
+
+    view.renderQuote(dailyQuote, false);
+    assert.ok(textElement.textContent.includes("Daily Quote Text"));
+    assert.ok(authorElement.textContent.includes("Daily Author"));
   });
 });

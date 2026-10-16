@@ -4,8 +4,8 @@ A fast, lightweight, and accessible Quote of the Day web application built with 
 
 ## Features
 
-- **Random Quote on Load**: Displays an inspiring quote with author attribution instantly on initial page visit.
-- **On-Demand "New quote" Button**: Smoothly cycles to another quote from the built-in curated library without full-page reloads and guarantees no consecutive repeats.
+- **Deterministic Daily Quote on Load**: Displays a consistent Quote of the Day on initial page visit, staying identical across all reloads on the same calendar day based on the user's local date.
+- **On-Demand "New quote" Button**: Smoothly cycles to another quote chosen randomly from the built-in curated library without full-page reloads and guarantees no consecutive repeats.
 - **Persistent Favoriting**: Toggle favorites with immediate visual feedback. Favorites are saved in browser `localStorage` and persist across page refreshes and browser restarts.
 - **Favorites Drawer**: Dedicated slide-out drawer to view all accumulated favorite quotes, complete with one-click removal and empty state handling.
 - **Graceful Storage Degradation**: Automatically falls back to in-memory session storage if `localStorage` is disabled or blocked in strict privacy modes, accompanied by a polite accessibility notification.

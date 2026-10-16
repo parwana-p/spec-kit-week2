@@ -79,8 +79,8 @@ export function initApp() {
   // Initial favorites render (to populate badge and drawer)
   favoritesView.renderFavorites(getResolvedFavorites());
 
-  // Display initial random quote (User Story 1)
-  const initialQuote = quoteService.getRandomQuote();
+  // Display initial deterministic Quote of the Day for today (User Story 1)
+  const initialQuote = quoteService.getDailyQuote();
   const isFav = storageService.isFavorite(initialQuote.id);
   quoteView.renderQuote(initialQuote, isFav);
 

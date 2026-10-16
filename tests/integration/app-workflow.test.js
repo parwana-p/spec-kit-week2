@@ -13,15 +13,33 @@ class MockStorage {
 }
 
 describe("End-to-End Workflow Verification (Quickstart Scenarios)", () => {
-  test("Scenario 1 & 2: Initial Load and New Quote Cycling without immediate repeats", () => {
+  test("Scenario 1: Daily Quote on Page Load stays identical for whole calendar day", () => {
     const quoteService = new QuoteService(quotes);
-    const firstQuote = quoteService.getRandomQuote();
-    assert.ok(firstQuote.id);
-    assert.ok(firstQuote.text.length > 0);
-    assert.ok(firstQuote.author.length > 0);
 
-    const secondQuote = quoteService.getRandomQuote(firstQuote.id);
-    assert.notEqual(secondQuote.id, firstQuote.id, "Second quote must not match first quote");
+    // Simulate same calendar day at different times
+    const morning = new Date(2026, 9, 17, 9, 0, 0);
+    const evening = new Date(2026, 9, 17, 21, 30, 0);
+
+    const morningQuote = quoteService.getDailyQuote(morning);
+    const eveningQuote = quoteService.getDailyQuote(evening);
+
+    assert.ok(morningQuote.id);
+    assert.ok(morningQuote.text.length > 0);
+    assert.ok(morningQuote.author.length > 0);
+    assert.equal(morningQuote.id, eveningQuote.id, "Quote on same calendar day must be identical");
+  });
+
+  test("Scenario 2: New Quote Button cycles to random quote and never repeats currently displayed quote", () => {
+    const quoteService = new QuoteService(quotes);
+    const currentQuote = quoteService.getDailyQuote();
+
+    // Cycling 30 times: each time nextQuote must differ from active quote
+    let active = currentQuote;
+    for (let i = 0; i < 30; i++) {
+      const nextQuote = quoteService.getRandomQuote(active.id);
+      assert.notEqual(nextQuote.id, active.id, `Iteration ${i}: next quote must not equal active quote`);
+      active = nextQuote;
+    }
   });
 
   test("Scenario 3 & 4: Favoriting, Persistence across reload, and Drawer Removal", () => {

@@ -2,7 +2,7 @@
 
 **Feature**: `001-quote-of-the-day`
 **Date**: 2026-10-17
-**Status**: Completed
+**Status**: Completed (Updated for Deterministic Daily Quote Selection)
 
 ## 1. Architecture & Modularity
 
@@ -32,7 +32,7 @@ Use browser `window.localStorage` to store user favorites, wrapped within a dedi
 ### Rationale
 - **User Requirement**: Explicitly requested `localStorage`.
 - **Key Schema**: Store under the namespaced key `qod_favorites_v1`.
-- **Fault Tolerance**: Wrapping access in `try / catch` blocks catches `SecurityError` and `QuotaExceededError`. When storage fails, the service falls back to in-memory state and triggers a non-intrusive UI notification (satisfying FR-013).
+- **Fault Tolerance**: Wrapping access in `try / catch` blocks catches `SecurityError` and `QuotaExceededError`. When storage fails, the service falls back to in-memory state and triggers a non-intrusive UI notification (satisfying FR-013/FR-014).
 
 ### Alternatives Considered
 - **IndexedDB**: Asynchronous and capable of larger datasets, but adds unnecessary complexity and asynchronous ceremony for storing a small list of quote IDs.
@@ -41,22 +41,63 @@ Use browser `window.localStorage` to store user favorites, wrapped within a dedi
 
 ---
 
-## 3. Quote Selection & Consecutive Repeat Prevention
+## 3. Deterministic Daily Quote Selection Algorithm
 
 ### Decision
-Implement `QuoteService.getRandomQuote(excludeId)` which selects a quote from the curated collection. If the collection contains 2 or more items and a quote is currently active, the service filters out the active quote or recalculates an offset to guarantee that the next quote is never the same as the current quote.
+Implement `QuoteService.getDailyQuote(date = new Date())` which deterministically extracts the local calendar date (`YYYY-MM-DD`) and computes a stable integer hash index:
+```javascript
+function getLocalDateKey(date) {
+  const y = date.getFullYear();
+  const m = String(date.getMonth() + 1).padStart(2, "0");
+  const d = String(date.getDate()).padStart(2, "0");
+  return `${y}-${m}-${d}`;
+}
+
+function hashString(str) {
+  let hash = 0;
+  for (let i = 0; i < str.length; i++) {
+    hash = ((hash << 5) - hash) + str.charCodeAt(i);
+    hash |= 0;
+  }
+  return Math.abs(hash);
+}
+
+// In QuoteService:
+getDailyQuote(date = new Date()) {
+  const key = getLocalDateKey(date);
+  const hash = hashString(key);
+  const index = hash % this._quotes.length;
+  return this._quotes[index];
+}
+```
 
 ### Rationale
-- Satisfies FR-005 and Acceptance Scenario 2 of User Story 2.
+- **Deterministic & Idempotent**: For any visit on the same local calendar date (regardless of time of day or page reloads), `getLocalDateKey(date)` evaluates to the exact same string, yielding the identical quote.
+- **Pure Function & Testable**: Accepting an optional `date` parameter enables deterministic unit testing for any date (e.g. testing leap days, year boundaries, consecutive days) without mocking global timers.
+- **Decoupled from Server**: Requires zero external clock or network synchronization, operating seamlessly offline.
+
+### Alternatives Considered
+- **Day of Year Calculation (`dayOfYear % length`)**: Day of year repeats identically across non-leap years and doesn't salt year differences evenly. A 32-bit string hash of `"YYYY-MM-DD"` creates better dispersion year over year.
+- **Caching in `localStorage`**: Caching the daily quote in storage creates stale cache issues if the user changes timezone, and requires extra storage synchronization. A pure deterministic mathematical function is stateless, instantaneous, and immune to cache invalidation bugs.
+
+---
+
+## 4. Quote Selection & Consecutive Repeat Prevention
+
+### Decision
+Implement `QuoteService.getRandomQuote(excludeId)` which selects a quote from the curated collection. If the collection contains 2 or more items and a quote is currently active (such as the daily quote or a previously clicked quote), the service excludes the currently active quote, guaranteeing that the next quote is never identical to the current quote.
+
+### Rationale
+- Satisfies FR-006 and Acceptance Scenario 2 of User Story 2.
 - Handles edge cases cleanly: if collection size is 1, returns the single quote without crashing or infinite looping.
 
 ### Alternatives Considered
 - **Random selection without exclusion**: Can result in the same quote being selected twice consecutively, producing poor user feedback when clicking "New quote".
-- **Full Fisher-Yates Deck Shuffling**: Shuffles the whole array in advance. Slightly more complex state to track; tracking `excludeId` or `lastQuoteId` is cleaner and stateless.
+- **Full Fisher-Yates Deck Shuffling**: Shuffles the whole array in advance. Slightly more complex state to track; tracking `excludeId` is cleaner and stateless.
 
 ---
 
-## 4. Favorites Data Representation
+## 5. Favorites Data Representation
 
 ### Decision
 Store an array of lightweight record objects containing `quoteId` and `favoritedAt` ISO timestamp:
@@ -71,13 +112,9 @@ At runtime, maintain a `Set<string>` of active favorite IDs for $O(1)$ lookup wh
 - Avoids duplicating quote text in storage; if quotes are enriched or formatted, storage data remains valid.
 - Storing `favoritedAt` enables chronological sorting of favorites in the favorites list.
 
-### Alternatives Considered
-- **Storing Full Quote Objects**: Redundant data duplication in `localStorage`, risk of stale quotes if built-in list is updated.
-- **Storing IDs as comma-separated string**: Fragile parsing compared to JSON array.
-
 ---
 
-## 5. Accessibility & Responsive UX
+## 6. Accessibility & Responsive UX
 
 ### Decision
 - **Semantic HTML**: `<main>`, `<article class="quote-card">`, `<blockquote>`, `<cite>`, and accessible `<button>` controls.
@@ -85,14 +122,11 @@ At runtime, maintain a `Set<string>` of active favorite IDs for $O(1)$ lookup wh
 - **Accessible Toggle**: Use `aria-pressed="true|false"` and descriptive `aria-label` (e.g., "Add quote to favorites" / "Remove quote from favorites").
 - **Responsive Typography**: Fluid typography using CSS `clamp()` and modern system font stacks for fast load times and clean reading across all viewports from 320px to 4K displays.
 
-### Rationale
-- Satisfies WCAG 2.1 AA requirements and Success Criteria SC-004 & SC-005.
-
 ---
 
-## 6. Testing Strategy
+## 7. Testing Strategy
 
 ### Decision
-- **Unit Tests**: Test `QuoteService` and `StorageService` using Node's built-in `node:test` and `node:assert` modules. Zero external npm dependencies required for running test suites.
-- **Integration Tests**: Mock `localStorage` and verify end-to-end interactions (quote cycling, favorite toggling, persistence lifecycle).
-- **Manual Verification**: Run headless or in-browser verification following `quickstart.md`.
+- **Unit Tests**: Test `QuoteService.getDailyQuote()` with multiple specific dates (asserting deterministic stability and date-to-date variation) and `QuoteService.getRandomQuote(excludeId)` using Node's built-in `node:test` and `node:assert`.
+- **Integration Tests**: Verify that `initApp` renders the deterministic daily quote upon page load and syncs favorite state.
+- **Manual Verification**: Follow `quickstart.md` scenarios for same-day reloads and "New quote" clicks.
