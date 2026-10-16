@@ -6,10 +6,10 @@
 
 **Purpose**: Project initialization and basic directory structure
 
-- [ ] T001 Create project directory structure (`src/`, `src/css/`, `src/js/`, `src/js/data/`, `src/js/services/`, `src/js/ui/`, `tests/unit/`, `tests/integration/`) per implementation plan
-- [ ] T002 [P] Create `package.json` with `"type": "module"` and `"test": "node --test tests/**/*.test.js"` in repository root
-- [ ] T003 [P] Create base CSS tokens, CSS reset, and responsive layout grid in `src/css/styles.css`
-- [ ] T004 [P] Create UI component styling (quote card, buttons, drawer, accessibility focus indicators) in `src/css/components.css`
+- [X] T001 Create project directory structure (`src/`, `src/css/`, `src/js/`, `src/js/data/`, `src/js/services/`, `src/js/ui/`, `tests/unit/`, `tests/integration/`) per implementation plan
+- [X] T002 [P] Create `package.json` with `"type": "module"` and `"test": "node --test tests/**/*.test.js"` in repository root
+- [X] T003 [P] Create base CSS tokens, CSS reset, and responsive layout grid in `src/css/styles.css`
+- [X] T004 [P] Create UI component styling (quote card, buttons, drawer, accessibility focus indicators) in `src/css/components.css`
 
 ---
 
@@ -19,11 +19,11 @@
 
 **⚠️ CRITICAL**: No user story work can begin until this phase is complete
 
-- [ ] T005 Create curated quote dataset with at least 25 diverse quotes in `src/js/data/quotes.js` satisfying verbatim constraints: `id` "non-empty, alphanumeric with dashes (e.g. quote-001)", `text` "non-empty string, trimmed", `author` "non-empty string", and optional `category`
-- [ ] T006 [P] Create unit test suite for StorageService in `tests/unit/storage.test.js` covering `getFavorites`, `addFavorite`, `removeFavorite`, `isFavorite`, corrupted JSON fallback, and in-memory fallback
-- [ ] T007 Implement `StorageService` in `src/js/services/storage.js` implementing [storage.contract.md](contracts/storage.contract.md) with `localStorage` key `qod_favorites_v1` and in-memory fallback
-- [ ] T008 [P] Create unit test suite for QuoteService in `tests/unit/quote-service.test.js` covering `getRandomQuote`, `getQuoteById`, `getAllQuotes`, and single-quote edge cases
-- [ ] T009 Implement `QuoteService` in `src/js/services/quote-service.js` implementing [quote-service.contract.md](contracts/quote-service.contract.md) for random quote selection and quote lookup
+- [X] T005 Create curated quote dataset with at least 25 diverse quotes in `src/js/data/quotes.js` satisfying verbatim constraints: `id` "non-empty, alphanumeric with dashes (e.g. quote-001)", `text` "non-empty string, trimmed", `author` "non-empty string", and optional `category`
+- [X] T006 [P] Create unit test suite for StorageService in `tests/unit/storage.test.js` covering `getFavorites`, `addFavorite`, `removeFavorite`, `isFavorite`, corrupted JSON fallback, and in-memory fallback
+- [X] T007 Implement `StorageService` in `src/js/services/storage.js` implementing [storage.contract.md](contracts/storage.contract.md) with `localStorage` key `qod_favorites_v1` and in-memory fallback
+- [X] T008 [P] Create unit test suite for QuoteService in `tests/unit/quote-service.test.js` covering `getRandomQuote`, `getQuoteById`, `getAllQuotes`, and single-quote edge cases
+- [X] T009 Implement `QuoteService` in `src/js/services/quote-service.js` implementing [quote-service.contract.md](contracts/quote-service.contract.md) for random quote selection and quote lookup
 
 **Checkpoint**: Foundation ready - all core services and data layers are complete and tested.
 
@@ -38,13 +38,13 @@
 ### Tests for User Story 1 🧪
 > **NOTE: Write these tests FIRST, ensure they FAIL before implementation**
 
-- [ ] T010 [P] [US1] Create integration test for initial page load and quote rendering in `tests/integration/quote-view.test.js`
+- [X] T010 [P] [US1] Create integration test for initial page load and quote rendering in `tests/integration/quote-view.test.js`
 
 ### Implementation for User Story 1
 
-- [ ] T011 [P] [US1] Create semantic HTML5 document structure with `#quote-container`, `#quote-text`, and `#quote-author` in `src/index.html`
-- [ ] T012 [US1] Implement `QuoteView` component in `src/js/ui/quote-view.js` to render quote text, author attribution, and manage `aria-live="polite"`
-- [ ] T013 [US1] Implement initial page bootstrap in `src/js/app.js` integrating `QuoteService` and `QuoteView` to display a random quote on load
+- [X] T011 [P] [US1] Create semantic HTML5 document structure with `#quote-container`, `#quote-text`, and `#quote-author` in `src/index.html`
+- [X] T012 [US1] Implement `QuoteView` component in `src/js/ui/quote-view.js` to render quote text, author attribution, and manage `aria-live="polite"`
+- [X] T013 [US1] Implement initial page bootstrap in `src/js/app.js` integrating `QuoteService` and `QuoteView` to display a random quote on load
 
 **Checkpoint**: User Story 1 is fully functional and delivers an independently testable MVP.
 
@@ -58,13 +58,13 @@
 
 ### Tests for User Story 2 🧪
 
-- [ ] T014 [P] [US2] Add unit tests in `tests/unit/quote-service.test.js` verifying `getRandomQuote(excludeId)` never returns `excludeId` when collection size $\ge 2$
+- [X] T014 [P] [US2] Add unit tests in `tests/unit/quote-service.test.js` verifying `getRandomQuote(excludeId)` never returns `excludeId` when collection size $\ge 2$
 
 ### Implementation for User Story 2
 
-- [ ] T015 [US2] Update `QuoteService` in `src/js/services/quote-service.js` to enforce repeat prevention when `excludeId` is provided
-- [ ] T016 [P] [US2] Add accessible "New quote" button `#new-quote-btn` with `aria-label="Show new quote"` in `src/index.html`
-- [ ] T017 [US2] Bind "New quote" button click handler in `src/js/app.js` to fetch a distinct random quote and update `QuoteView`
+- [X] T015 [US2] Update `QuoteService` in `src/js/services/quote-service.js` to enforce repeat prevention when `excludeId` is provided
+- [X] T016 [P] [US2] Add accessible "New quote" button `#new-quote-btn` with `aria-label="Show new quote"` in `src/index.html`
+- [X] T017 [US2] Bind "New quote" button click handler in `src/js/app.js` to fetch a distinct random quote and update `QuoteView`
 
 **Checkpoint**: User Stories 1 and 2 work independently and seamlessly together.
 
@@ -78,14 +78,14 @@
 
 ### Tests for User Story 3 🧪
 
-- [ ] T018 [P] [US3] Create integration tests for favorite toggle and persistence lifecycle in `tests/integration/favorite-toggle.test.js`
+- [X] T018 [P] [US3] Create integration tests for favorite toggle and persistence lifecycle in `tests/integration/favorite-toggle.test.js`
 
 ### Implementation for User Story 3
 
-- [ ] T019 [P] [US3] Add favorite toggle button `#favorite-toggle-btn` with `aria-pressed="false"` inside `#quote-container` in `src/index.html`
-- [ ] T020 [US3] Update `QuoteView` in `src/js/ui/quote-view.js` to reflect active/inactive favorite icon state and update `aria-pressed`
-- [ ] T021 [US3] Wire favorite button click handler in `src/js/app.js` to toggle state in `StorageService` and update `QuoteView`
-- [ ] T022 [US3] Add storage fallback warning element `#storage-warning` in `src/index.html` and trigger display in `src/js/app.js` when `storage.isPersistent() === false`
+- [X] T019 [P] [US3] Add favorite toggle button `#favorite-toggle-btn` with `aria-pressed="false"` inside `#quote-container` in `src/index.html`
+- [X] T020 [US3] Update `QuoteView` in `src/js/ui/quote-view.js` to reflect active/inactive favorite icon state and update `aria-pressed`
+- [X] T021 [US3] Wire favorite button click handler in `src/js/app.js` to toggle state in `StorageService` and update `QuoteView`
+- [X] T022 [US3] Add storage fallback warning element `#storage-warning` in `src/index.html` and trigger display in `src/js/app.js` when `storage.isPersistent() === false`
 
 **Checkpoint**: User Stories 1, 2, and 3 are functional with full persistence.
 
@@ -99,13 +99,13 @@
 
 ### Tests for User Story 4 🧪
 
-- [ ] T023 [P] [US4] Create unit and DOM tests for favorites drawer rendering and removal actions in `tests/unit/favorites-view.test.js`
+- [X] T023 [P] [US4] Create unit and DOM tests for favorites drawer rendering and removal actions in `tests/unit/favorites-view.test.js`
 
 ### Implementation for User Story 4
 
-- [ ] T024 [P] [US4] Add favorites drawer container `#favorites-drawer`, drawer toggle button `#toggle-favorites-btn`, and `#favorites-list` in `src/index.html`
-- [ ] T025 [US4] Implement `FavoritesView` in `src/js/ui/favorites-view.js` to render favorites list, empty state message, and item removal controls
-- [ ] T026 [US4] Wire favorites drawer toggle and item removal events in `src/js/app.js` updating `StorageService` and refreshing active quote favorite state
+- [X] T024 [P] [US4] Add favorites drawer container `#favorites-drawer`, drawer toggle button `#toggle-favorites-btn`, and `#favorites-list` in `src/index.html`
+- [X] T025 [US4] Implement `FavoritesView` in `src/js/ui/favorites-view.js` to render favorites list, empty state message, and item removal controls
+- [X] T026 [US4] Wire favorites drawer toggle and item removal events in `src/js/app.js` updating `StorageService` and refreshing active quote favorite state
 
 **Checkpoint**: All user stories (P1 through P4) are fully implemented and functional.
 
@@ -115,10 +115,10 @@
 
 **Purpose**: Quality hardening, accessibility verification, and final validation
 
-- [ ] T027 [P] Execute full automated test suite `node --test tests/**/*.test.js` and verify 100% passing rate
-- [ ] T028 [P] Audit WCAG 2.1 AA accessibility (color contrast $\ge 4.5:1$, keyboard navigation, focus outlines, ARIA labels) across `src/index.html` and `src/css/`
-- [ ] T029 Execute full end-to-end manual verification against scenarios in `specs/001-quote-of-the-day/quickstart.md`
-- [ ] T030 [P] Create `README.md` in repository root documenting architecture, usage instructions, and test commands
+- [X] T027 [P] Execute full automated test suite `node --test tests/**/*.test.js` and verify 100% passing rate
+- [X] T028 [P] Audit WCAG 2.1 AA accessibility (color contrast $\ge 4.5:1$, keyboard navigation, focus outlines, ARIA labels) across `src/index.html` and `src/css/`
+- [X] T029 Execute full end-to-end manual verification against scenarios in `specs/001-quote-of-the-day/quickstart.md`
+- [X] T030 [P] Create `README.md` in repository root documenting architecture, usage instructions, and test commands
 
 ---
 
